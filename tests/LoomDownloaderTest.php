@@ -1,14 +1,14 @@
 <?php
 
-use LoomDownloader\LoomDownloader;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Exception\RequestException;
+use LoomDownloader\LoomDownloader;
 
 beforeEach(function () {
-    $this->mockHandler = new MockHandler();
+    $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);
     $this->mockClient = new Client(['handler' => $handlerStack]);
 });
@@ -19,7 +19,7 @@ test('downloadVideo returns video content', function () {
         new Response(200, [], 'fake video content')
     );
 
-    $downloader = new LoomDownloader();
+    $downloader = new LoomDownloader;
     $reflector = new ReflectionClass($downloader);
     $clientProperty = $reflector->getProperty('client');
     $clientProperty->setAccessible(true);
@@ -36,7 +36,7 @@ test('saveVideo saves video to file', function () {
         new Response(200, [], 'fake video content')
     );
 
-    $downloader = new LoomDownloader();
+    $downloader = new LoomDownloader;
     $reflector = new ReflectionClass($downloader);
     $clientProperty = $reflector->getProperty('client');
     $clientProperty->setAccessible(true);
@@ -56,7 +56,7 @@ test('throws exception on API error', function () {
         new RequestException('Error Communicating with Server', new \GuzzleHttp\Psr7\Request('GET', 'test'))
     );
 
-    $downloader = new LoomDownloader();
+    $downloader = new LoomDownloader;
     $reflector = new ReflectionClass($downloader);
     $clientProperty = $reflector->getProperty('client');
     $clientProperty->setAccessible(true);
@@ -71,7 +71,7 @@ test('throws exception on download error', function () {
         new RequestException('Error Downloading Video', new \GuzzleHttp\Psr7\Request('GET', 'test'))
     );
 
-    $downloader = new LoomDownloader();
+    $downloader = new LoomDownloader;
     $reflector = new ReflectionClass($downloader);
     $clientProperty = $reflector->getProperty('client');
     $clientProperty->setAccessible(true);
