@@ -19,42 +19,47 @@ Loom doesn't provide an official API for video downloads. This package fills tha
 
 Use responsibly and only for videos you have the right to download and store.
 
-## 🎬 Quick Start
+## 🔧 Usage Examples
 
-Here's a quick example to get you started:
+The `LoomDownloader` class provides two main methods for working with Loom videos: `downloadVideo` and `saveVideo`.
+
+### Download Video Content
+
+To download the video content and get it as a binary:
 
 ```php
 use LoomDownloader\LoomDownloader;
 
 $downloader = new LoomDownloader();
-$filePath = $downloader->saveVideo('https://www.loom.com/share/your-video-id', 'path/to/save/video.mp4');
-
-echo "Video saved to: " . $filePath;
-```
-
-## 🔧 Usage Examples
-
-### Download Video Content
-
-To get the video content as a string:
-
-```php
-$downloader = new LoomDownloader();
 $videoContent = $downloader->downloadVideo('https://www.loom.com/share/your-video-id');
+
+// $videoContent now contains the binary data of the video
+// Be cautious with this method for large videos as it loads the entire video into memory
 ```
 
 ### Save Video to File
 
-To save the video directly to a file:
+To download the video and save it directly to a file:
 
 ```php
+use LoomDownloader\LoomDownloader;
+
 $downloader = new LoomDownloader();
 $filePath = $downloader->saveVideo('https://www.loom.com/share/your-video-id', '/path/to/save/video.mp4');
+
+echo "Video saved to: " . $filePath;
+```
+
+If you don't specify a destination, the video will be saved to a temporary directory:
+
+```php
+$filePath = $downloader->saveVideo('https://www.loom.com/share/your-video-id');
+echo "Video saved to: " . $filePath;
 ```
 
 ## 🛠 Laravel Integration
 
-While this package can be used in any PHP project, it integrates smoothly with Laravel. Here are some examples of how you can use the Loom Video Downloader in your Laravel application:
+While this package can be used in any PHP project, here are some examples of how you can integrate it with Laravel:
 
 ### Basic Usage in a Controller
 
@@ -83,67 +88,7 @@ class LoomController extends Controller
 }
 ```
 
-### Integration with Laravel's File Storage
-
-Use Laravel's `Storage` facade to save the downloaded video:
-
-```php
-use Illuminate\Support\Facades\Storage;
-use LoomDownloader\LoomDownloader;
-
-class LoomController extends Controller
-{
-    public function store(Request $request)
-    {
-        $downloader = new LoomDownloader();
-        $videoContent = $downloader->downloadVideo($request->loom_url);
-        
-        $path = Storage::put('videos/loom-video.mp4', $videoContent);
-        
-        return response()->json(['message' => 'Video stored successfully', 'path' => $path]);
-    }
-}
-```
-
-### Background Processing with Laravel Queues
-
-Create a job to download videos in the background:
-
-```php
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use LoomDownloader\LoomDownloader;
-
-class DownloadLoomVideo implements ShouldQueue
-{
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    protected $loomUrl;
-    protected $savePath;
-
-    public function __construct($loomUrl, $savePath)
-    {
-        $this->loomUrl = $loomUrl;
-        $this->savePath = $savePath;
-    }
-
-    public function handle()
-    {
-        $downloader = new LoomDownloader();
-        $downloader->saveVideo($this->loomUrl, $this->savePath);
-    }
-}
-
-// In your controller:
-DownloadLoomVideo::dispatch($loomUrl, storage_path('app/videos/loom_video.mp4'));
-```
-
 ### Error Handling with Laravel Logging
-
-Wrap the download process in a try-catch block and use Laravel's logging:
 
 ```php
 use Illuminate\Support\Facades\Log;
@@ -165,31 +110,6 @@ class LoomController extends Controller
 }
 ```
 
-### Caching Downloaded Videos
-
-Use Laravel's Cache facade to store downloaded videos:
-
-```php
-use Illuminate\Support\Facades\Cache;
-use LoomDownloader\LoomDownloader;
-
-class LoomController extends Controller
-{
-    public function getCachedVideo(Request $request)
-    {
-        $videoId = $request->video_id;
-        $videoContent = Cache::remember('loom_video_' . $videoId, 3600, function () use ($request) {
-            $downloader = new LoomDownloader();
-            return $downloader->downloadVideo($request->loom_url);
-        });
-
-        return response($videoContent)
-            ->header('Content-Type', 'video/mp4')
-            ->header('Content-Disposition', 'inline; filename="loom_video.mp4"');
-    }
-}
-```
-
 ## ℹ️ Important Information
 
 Before using this package, please be aware of the following:
@@ -200,7 +120,7 @@ Before using this package, please be aware of the following:
 
 3. **Video Quality**: Videos are downloaded in the format provided by Loom's API. There are no options to select different qualities or formats.
 
-4. **Large Videos**: While the package can handle large files, there are no specific optimizations or progress indicators for lengthy downloads.
+4. **Large Videos**: While the package can handle large files, be cautious when using the `downloadVideo` method as it loads the entire video into memory. For large videos, prefer the `saveVideo` method which streams the video directly to a file.
 
 5. **Legal and Ethical Considerations**: Ensure you have the right to download and use the Loom videos. This package does not enforce access controls or address legal concerns related to video downloading. Always respect copyright and privacy rights.
 
