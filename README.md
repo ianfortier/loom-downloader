@@ -38,7 +38,9 @@ $filePath = $downloader->saveVideo('https://www.loom.com/share/your-video-id', '
 echo "Video saved to: " . $filePath;
 ```
 
-### Laravel Example
+### Laravel Examples
+
+#### Save and Download
 
 ```php
 use LoomDownloader\LoomDownloader;
@@ -51,6 +53,25 @@ public function downloadLoomVideo(Request $request)
     return response()->download($filePath);
 }
 ```
+
+#### Stream Video Content
+
+```php
+use LoomDownloader\LoomDownloader;
+
+public function streamLoomVideo(Request $request)
+{
+    $downloader = new LoomDownloader();
+    $videoContent = $downloader->downloadVideo($request->loom_url);
+    
+    return response($videoContent)
+        ->header('Content-Type', 'video/mp4')
+        ->header('Content-Disposition', 'inline; filename="loom_video.mp4"');
+}
+```
+
+In this example, we're using the `downloadVideo()` method to get the video content and then streaming it directly to the user's browser. The `Content-Disposition` header is set to `inline`, which will make most browsers attempt to play the video in the browser rather than download it. If you want to force a download, you can change `inline` to `attachment`.
+
 
 ## Testing
 
